@@ -1,0 +1,50 @@
+name: Review Agent
+
+on:
+    pull_request:
+        types: [opened, synchronize, ready_for_review]
+    workflow_run:
+        workflows: ["CI"]
+        types: [completed]
+
+jobs:
+    review:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install -r requirements.txt
+
+            - name: Wait for CI
+              uses: lewagon/wait-on-check-action@v1.3.1
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  running-workflow-name: "review"
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+                  wait-interval: 10
+
+            - name: Run Review Agent
+              env:
+                  GITHUB_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
+                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+                  OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+              run: |
+                  python -m src.agents.review_agent \
+                    --repo ${{ github.repository }} \
+                    --pr ${{ github.event.pull_request.number }}
+
+            - name: Upload review results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: review-results
+                  path: review-results.json

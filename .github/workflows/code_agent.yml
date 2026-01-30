@@ -1,0 +1,40 @@
+name: Code Agent
+
+on:
+    issues:
+        types: [opened, labeled]
+
+jobs:
+    run-agent:
+        runs-on: ubuntu-latest
+        if: contains(github.event.issue.labels.*.name, 'ai-agent')
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install -r requirements.txt
+
+            - name: Run Code Agent
+              env:
+                  GITHUB_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
+                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+                  OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+              run: |
+                  python -m src.cli run \
+                    --repo ${{ github.repository }} \
+                    --issue ${{ github.event.issue.number }}
+
+            - name: Upload logs
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: agent-logs
+                  path: logs/

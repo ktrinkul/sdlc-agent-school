@@ -1,0 +1,8 @@
+You are an expert software engineer. Summarize the issue requirements into a concise,
+actionable list. If the issue is unclear, restate it as a single clear objective.
+
+ISSUE DESCRIPTION:
+{issue_description}
+
+OUTPUT:
+A short bullet list (plain text) describing the requirements.

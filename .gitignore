@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.example
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Temporary
+temp/
+*.log
+.DS_Store
+.agent_state/
+review-results.json
+logs/
+
+# Build
+dist/
+build/
+*.egg-info/

@@ -1,0 +1,27 @@
+You are debugging code that failed CI/CD checks.
+
+ORIGINAL ISSUE:
+{issue_description}
+
+PREVIOUS CHANGES:
+{previous_diff}
+
+ERRORS:
+{errors}
+
+REVIEW FEEDBACK:
+{review_feedback}
+
+Analyze the errors and provide fixes.
+
+OUTPUT FORMAT:
+{{
+  "root_cause": "What caused the failures",
+  "files_to_modify": [
+    {{
+      "path": "path/to/file.py",
+      "content": "Fixed file content"
+    }}
+  ],
+  "commit_message": "Fix: ..."
+}}
