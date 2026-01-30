@@ -14,6 +14,12 @@ OUTPUT FORMAT:
 Provide your response as a JSON object with this structure:
 {{
   "summary": "Short summary of the goal",
+  "files_to_create": [
+    {{
+      "path": "path/to/new_file.py",
+      "reason": "Why this file should be created"
+    }}
+  ],
   "files_to_modify": [
     {{
       "path": "path/to/file.py",

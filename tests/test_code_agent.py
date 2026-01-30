@@ -106,6 +106,7 @@ class FakeLLM:
         if "implementation plan" in prompt.lower():
             return {
                 "summary": "Plan",
+                "files_to_create": [{"path": "new.py", "reason": "New logic"}],
                 "files_to_modify": [{"path": "main.py", "reason": "Update output"}],
                 "files_to_avoid": [],
                 "plan": ["Step 1"],
