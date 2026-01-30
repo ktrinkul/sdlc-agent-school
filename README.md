@@ -27,21 +27,21 @@ fixes issues until resolved.
 4) Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ### Usage
 
 ```bash
 # Run agent on an issue
-python -m src.cli run --repo owner/repo --issue 123
+uv run python -m src.cli run --repo owner/repo --issue 123
 
 # Check configuration
-python -m src.cli test
+uv run python -m src.cli test
 
-# Docker
+# Docker (runs the webhook server)
 docker-compose -f docker/docker-compose.yml up -d
-docker-compose -f docker/docker-compose.yml exec agent python -m src.cli run --repo owner/repo --issue 123
+docker-compose -f docker/docker-compose.yml exec agent uv run python -m src.cli run --repo owner/repo --issue 123
 ```
 
 ## How It Works

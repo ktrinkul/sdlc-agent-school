@@ -8,7 +8,7 @@ import logging
 from src.agents.code_agent import CodeAgent
 from src.agents.review_agent import ReviewAgent
 from src.core.config import settings
-from src.core.github_client import GitHubClient, create_github_client
+from src.core.github_client import create_github_client
 from src.core.llm_client import create_llm_client
 
 

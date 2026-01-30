@@ -8,7 +8,6 @@ from typing import Any
 import requests
 from github import Github, GithubException
 
-from src.core.github_app_auth import GitHubAppAuth
 from src.core.config import Settings
 
 logger = logging.getLogger(__name__)
