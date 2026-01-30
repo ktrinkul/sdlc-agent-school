@@ -34,10 +34,6 @@ class GitHubClient:
             }
         )
 
-    @property
-    def token(self) -> str:
-        return self._token
-
     def _get_repo(self, repo: str):
         return self._client.get_repo(repo)
 
@@ -216,19 +212,5 @@ class GitHubClient:
 
 def create_github_client(settings: Settings, repo: str | None = None) -> GitHubClient:
     if settings.github_auth_mode == "app":
-        if not settings.github_app_id or not settings.github_app_private_key_path:
-            raise ValueError("GitHub App auth requires GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY_PATH.")
-        auth = GitHubAppAuth(
-            app_id=settings.github_app_id,
-            private_key_path=settings.github_app_private_key_path,
-        )
-        installation_id = settings.github_app_installation_id
-        if installation_id is None:
-            if not repo:
-                raise ValueError(
-                    "GITHUB_APP_INSTALLATION_ID is not set and repo is unknown."
-                )
-            installation_id = auth.get_installation_id_for_repo(repo)
-        token = auth.get_installation_token(installation_id)
-        return GitHubClient(token)
+        logger.warning("GitHub App auth is disabled; falling back to PAT.")
     return GitHubClient(settings.github_token)
