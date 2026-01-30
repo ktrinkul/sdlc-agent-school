@@ -25,12 +25,19 @@ class ReviewAgent:
     def generate_plan(
         self, issue_description: str, repo_structure: str, relevant_files: str
     ) -> dict:
-        prompt = self._render_prompt(
-            "implementation_plan.txt",
-            issue_description=issue_description,
-            repo_structure=repo_structure,
-            relevant_files=relevant_files,
-        )
+        try:
+            prompt = self._render_prompt(
+                "implementation_plan.txt",
+                issue_description=issue_description,
+                repo_structure=repo_structure,
+                relevant_files=relevant_files,
+            )
+        except OSError as exc:
+            logger.warning("Failed to read implementation plan prompt: %s", exc)
+            prompt = (
+                "Create a JSON plan with summary, plan, acceptance_criteria.\n"
+                f"Issue:\n{issue_description}\n\nRepo:\n{repo_structure}\n\nFiles:\n{relevant_files}"
+            )
         return self.llm.generate_structured(
             prompt, system="Return only valid JSON. Do not include markdown."
         )
@@ -42,13 +49,20 @@ class ReviewAgent:
         diff: str,
         feedback_history: list[dict],
     ) -> dict:
-        prompt = self._render_prompt(
-            "review_feedback.txt",
-            issue_description=issue_description,
-            plan=json.dumps(plan, indent=2),
-            diff=diff,
-            feedback_history=json.dumps(feedback_history, indent=2),
-        )
+        try:
+            prompt = self._render_prompt(
+                "review_feedback.txt",
+                issue_description=issue_description,
+                plan=json.dumps(plan, indent=2),
+                diff=diff,
+                feedback_history=json.dumps(feedback_history, indent=2),
+            )
+        except OSError as exc:
+            logger.warning("Failed to read review feedback prompt: %s", exc)
+            prompt = (
+                "Review the diff against the issue and plan. Return JSON with summary, tasks, final_comment.\n"
+                f"Issue:\n{issue_description}\n\nPlan:\n{plan}\n\nDiff:\n{diff}\n\nHistory:\n{feedback_history}"
+            )
         return self.llm.generate_structured(
             prompt, system="Return only valid JSON. Do not include markdown."
         )
@@ -60,13 +74,20 @@ class ReviewAgent:
         plan: dict | None,
         feedback_history: list[dict],
     ) -> dict:
-        prompt = self._render_prompt(
-            "issue_comment_review.txt",
-            issue_description=issue_description,
-            comment_body=comment_body,
-            plan=json.dumps(plan, indent=2) if plan else "null",
-            feedback_history=json.dumps(feedback_history, indent=2),
-        )
+        try:
+            prompt = self._render_prompt(
+                "issue_comment_review.txt",
+                issue_description=issue_description,
+                comment_body=comment_body,
+                plan=json.dumps(plan, indent=2) if plan else "null",
+                feedback_history=json.dumps(feedback_history, indent=2),
+            )
+        except OSError as exc:
+            logger.warning("Failed to read issue comment review prompt: %s", exc)
+            prompt = (
+                "Decide if the new comment requires restart. Return JSON with restart, summary, reason.\n"
+                f"Issue:\n{issue_description}\n\nComment:\n{comment_body}\n\nPlan:\n{plan}\n\nHistory:\n{feedback_history}"
+            )
         return self.llm.generate_structured(
             prompt, system="Return only valid JSON. Do not include markdown."
         )
@@ -74,12 +95,19 @@ class ReviewAgent:
     def review_pr(self, repo: str, pr_number: int, issue_description: str) -> dict:
         diff = self.github.get_pr_diff(repo, pr_number)
         ci_results = self.github.get_workflow_runs(repo, pr_number)
-        prompt = self._render_prompt(
-            "code_review.txt",
-            issue_description=issue_description,
-            diff=diff,
-            ci_results=json.dumps(ci_results, indent=2),
-        )
+        try:
+            prompt = self._render_prompt(
+                "code_review.txt",
+                issue_description=issue_description,
+                diff=diff,
+                ci_results=json.dumps(ci_results, indent=2),
+            )
+        except OSError as exc:
+            logger.warning("Failed to read code review prompt: %s", exc)
+            prompt = (
+                "Review the PR diff and CI results. Return JSON with summary and issues.\n"
+                f"Issue:\n{issue_description}\n\nDiff:\n{diff}\n\nCI:\n{ci_results}"
+            )
         return self.llm.generate_structured(
             prompt, system="Return only valid JSON. Do not include markdown."
         )

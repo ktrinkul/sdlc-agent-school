@@ -204,10 +204,14 @@ class CodeAgent:
 
     def analyze_requirements(self, issue_description: str) -> str:
         """Summarize the issue into actionable requirements for the coder."""
-        prompt = self._render_prompt(
-            "requirements_analysis.txt",
-            issue_description=issue_description,
-        )
+        try:
+            prompt = self._render_prompt(
+                "requirements_analysis.txt",
+                issue_description=issue_description,
+            )
+        except OSError as exc:
+            logger.warning("Failed to read requirements prompt: %s", exc)
+            return issue_description
         logger.debug("Requirements analysis prompt:\n%s", prompt)
         response = self.llm.generate(prompt, system="Return a concise, actionable summary.")
         logger.info("Requirements analysis completed.")
@@ -232,12 +236,19 @@ class CodeAgent:
 
     def generate_solution(self, issue_description: str, repo_structure: str, relevant_files: str) -> dict:
         """Ask the model for a structured change plan and file updates."""
-        prompt = self._render_prompt(
-            "code_generation.txt",
-            issue_description=issue_description,
-            repo_structure=repo_structure,
-            relevant_files=relevant_files,
-        )
+        try:
+            prompt = self._render_prompt(
+                "code_generation.txt",
+                issue_description=issue_description,
+                repo_structure=repo_structure,
+                relevant_files=relevant_files,
+            )
+        except OSError as exc:
+            logger.warning("Failed to read code generation prompt: %s", exc)
+            prompt = (
+                "Generate a JSON object with files_to_modify and commit_message.\n"
+                f"Issue:\n{issue_description}\n\nRepo:\n{repo_structure}\n\nFiles:\n{relevant_files}"
+            )
         logger.debug("Code generation prompt:\n%s", prompt)
         response = self.llm.generate_structured(
             prompt, system="Return only valid JSON. Do not include markdown."
