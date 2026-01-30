@@ -34,6 +34,10 @@ class GitHubClient:
             }
         )
 
+    @property
+    def token(self) -> str:
+        return self._token
+
     def _get_repo(self, repo: str):
         return self._client.get_repo(repo)
 

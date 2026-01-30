@@ -283,7 +283,7 @@ class CodeAgent:
         return GitOperations(
             repo_url=f"https://github.com/{repo}",
             base_branch=self.config.base_branch,
-            token=self.config.github_token,
+            token=self._git_token(),
         )
 
     def commit_and_push(self, git_ops: GitOperations, issue_number: int, payload: dict, repo: str) -> None:
@@ -535,3 +535,6 @@ class CodeAgent:
         prompt_path = Path("prompts") / filename
         template = prompt_path.read_text(encoding="utf-8")
         return template.format(**kwargs)
+
+    def _git_token(self) -> str | None:
+        return getattr(self.github, "token", None) or self.config.github_token
